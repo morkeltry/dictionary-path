@@ -67,6 +67,8 @@ const purgeArraysMutably = (arraySet, purgeList, purgeFirstOccurrenceOnly=false)
 const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 /// find a path! (don't forget to avoid words on the blacklist)
 
+console.log (`find a path between ${word1} and ${word2}`)
+
   /// maybe we have a /reaally/ easy job here?
   if (hammingDistance (word1,word2) === 1)
     return [word1,word2];
@@ -76,6 +78,8 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
   const possibleStarts = hD1neighbours (dictionary, word1, blacklist);
   const possibleEnds = hD1neighbours (dictionary, word2, blacklist);
   const missingLink = allSharedMembers ([possibleStarts, possibleEnds])[0];
+console.log (`possibles: ${possibleStarts}...${possibleEnds}`);
+console.log (`missingLink: ${missingLink}`);
   // if no shared members in the arrays possibleStarts & possibleEnds, missingLink will be undefined,
   // otherwise the missing word in the path (or arbitrary one of possible paths if multiple exist)
   if (missingLink)
@@ -116,17 +120,21 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
       const resultsList = [];
       var pathMiddle;
       const newBlacklist = blacklist.concat (word1, word2);
+  console.log (`Got multiple possibles. possibleStarts=${possibleStarts}, possibleEnds=${possibleEnds}`);
       possibleStarts.forEach (el1 => {
         possibleEnds.forEach (el2 => {
+          console.log (`Trying ${el1}/${el2}`);
           pathMiddle= findPath (el1, el2, newBlacklist);
           if (pathMiddle)
             resultsList.push ([word1].concat (pathMiddle, word2));
         });
       });
+      console.log (`All the possibles for ${possibleStarts}/${possibleEnds} ::::${resultsList}`);
       if (resultsList.length === 0)
         return undefined;
       else {
         resultsList.sort ((list1,list2) => list1.length-list2.length);
+        console.log(`Got a list - returning ${resultsList[0]} as first member of ${resultsList}`);
         return resultsList[0];
       }
 

@@ -1,4 +1,4 @@
-dictionary = require ('./dictionary.easy.json')
+dictionary = require ('./dictionary.tricky.json')
 
 const hammingDistance = (word1,word2) => {
 
@@ -24,7 +24,6 @@ const hammingDistance = (word1,word2) => {
 
 const hD1neighbours = (subArray, targetWord, blacklist=[]) => {
   // return the subArray filtered down to only members with HammingDistance 1 from targetWord and exclude members of blacklist
-console.log (`finding ${targetWord}'s neighbours' in ${subArray}....`)
   return dictionary.filter (el =>
     !(blacklist.includes(el))
     && hammingDistance(el, targetWord) === 1);
@@ -134,6 +133,8 @@ console.log (`missingLink: ${missingLink}`);
       if (resultsList.length === 0)
         return undefined;
       else {
+        resultsList.sort ((list1,list2) => list1.length-list2.length);
+        console.log(`Got a list - returning ${resultsList[0]} as first member of ${resultsList}`);
         return resultsList[0];
       }
 
@@ -142,13 +143,9 @@ console.log (`missingLink: ${missingLink}`);
 
 }
 
-
-
-console.log(hammingDistance('biscuits','briskety'));
-
-console.log(`Let's go with ('lick','lack'): ${findPath('lick','lack')}\n`);
-console.log(`Let's go with ('lick','hack'): ${findPath('lick','hack')}\n`);
-console.log(`Let's go with ('sick','hack'): ${findPath('sick','hack')}\n`);
-console.log(`Let's go with ('sock','hack'): ${findPath('sock','hack')}\n`);
+console.log(`Answer to ('lick','lack'): ${findPath('lick','lack')}\n`);
+console.log(`Answer to ('lick','hack'): ${findPath('lick','hack')}\n`);
+console.log(`Answer to ('sick','hack'): ${findPath('sick','hack')}\n`);
+console.log(`Answer to ('sock','hack'): ${findPath('sock','hack')}\n`);
 // console.log(`Let's go with ('',''): ${findPath('','')}`);
 // console.log(`Let's go with ('',''): ${findPath('','')}`);

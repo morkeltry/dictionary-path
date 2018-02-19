@@ -24,7 +24,7 @@ const hammingDistance = (word1,word2) => {
 
 const hD1neighbours = (subArray, targetWord, blacklist=[]) => {
   // return the subArray filtered down to only members with HammingDistance 1 from targetWord and exclude members of blacklist
-console.log (`trying ${targetWord} in ${subArray}....`)
+console.log (`finding ${targetWord}'s neighbours' in ${subArray}....`)
   return dictionary.filter (el =>
     !(blacklist.includes(el))
     && hammingDistance(el, targetWord) === 1);
@@ -65,7 +65,7 @@ const purgeArraysMutably = (arraySet, purgeList, purgeFirstOccurrenceOnly=false)
 }
 
 
-const findPath = (word1,word2, blacklist, suppressOutput=true) => {
+const findPath = (word1,word2, blacklist=[], suppressOutput) => {
 /// find a path! (don't forget to avoid words on the blacklist)
 
 console.log (`find a path between ${word1} and ${word2}`)
@@ -79,6 +79,8 @@ console.log (`find a path between ${word1} and ${word2}`)
   const possibleStarts = hD1neighbours (dictionary, word1, blacklist);
   const possibleEnds = hD1neighbours (dictionary, word2, blacklist);
   const missingLink = allSharedMembers ([possibleStarts, possibleEnds])[0];
+console.log (`possibles: ${possibleStarts}...${possibleEnds}`);
+console.log (`missingLink: ${missingLink}`);
   // if no shared members in the arrays possibleStarts & possibleEnds, missingLink will be undefined,
   // otherwise the missing word in the path (or arbitrary one of possible paths if multiple exist)
   if (missingLink)
@@ -103,11 +105,7 @@ console.log (`find a path between ${word1} and ${word2}`)
     case 1: {
       const pathMiddle= findPath (possibleStarts[0],possibleEnds[0], blacklist.concat (word1, word2))
       if (pathMiddle)
-        return [word1]
-          .concat (possibleStarts[0])
-          .concat (pathMiddle)
-          .concat (possibleEnds[0])
-          .concat [word2];
+        return [word1].concat (possibleStarts[0], pathMiddle, possibleEnds[0], word2);
       else {
         if (!suppressOutput) {
           console.log (`Couldn't find path between ${word1} and ${word2}.`);
@@ -117,8 +115,27 @@ console.log (`find a path between ${word1} and ${word2}`)
     }
 
 
-    // default case: one or both of start and end have multiple possible paths;
+    // default case: one or both of start and end have multiple possible paths
+    // naive algorithm: try all and compare lengths.
     default: {
+      const resultsList = [];
+      var pathMiddle;
+      const newBlacklist = blacklist.concat (word1, word2);
+  console.log (`Got multiple possibles. possibleStarts=${possibleStarts}, possibleEnds=${possibleEnds}`);
+      possibleStarts.forEach (el1 => {
+        possibleEnds.forEach (el2 => {
+          console.log (`Trying ${el1}/${el2}`);
+          pathMiddle= findPath (el1, el2, newBlacklist);
+          if (pathMiddle)
+            resultsList.push ([word1].concat (possibleStarts[0], pathMiddle, possibleEnds[0], word2));
+        });
+      });
+      console.log (`All the possibles for ${possibleStarts}/${possibleEnds} ::::${resultsList}`);
+      if (resultsList.length === 0)
+        return undefined;
+      else {
+        return resultsList[0];
+      }
 
     }
   };
@@ -129,9 +146,9 @@ console.log (`find a path between ${word1} and ${word2}`)
 
 console.log(hammingDistance('biscuits','briskety'));
 
-console.log(`Let's go with ('lick','lack'): ${findPath('lick','lack')}`);
-console.log(`Let's go with ('lick','hack'): ${findPath('lick','hack')}`);
-console.log(`Let's go with ('sick','hack'): ${findPath('sick','hack')}`);
-console.log(`Let's go with ('sock','hack'): ${findPath('sock','hack')}`);
+console.log(`Let's go with ('lick','lack'): ${findPath('lick','lack')}\n`);
+console.log(`Let's go with ('lick','hack'): ${findPath('lick','hack')}\n`);
+console.log(`Let's go with ('sick','hack'): ${findPath('sick','hack')}\n`);
+console.log(`Let's go with ('sock','hack'): ${findPath('sock','hack')}\n`);
 // console.log(`Let's go with ('',''): ${findPath('','')}`);
 // console.log(`Let's go with ('',''): ${findPath('','')}`);

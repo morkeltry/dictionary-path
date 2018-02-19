@@ -105,7 +105,7 @@ console.log (`missingLink: ${missingLink}`);
     case 1: {
       const pathMiddle= findPath (possibleStarts[0],possibleEnds[0], blacklist.concat (word1, word2))
       if (pathMiddle)
-        return [word1].concat (possibleStarts[0], pathMiddle, possibleEnds[0], word2);
+        return [word1].concat (pathMiddle, word2);
       else {
         if (!suppressOutput) {
           console.log (`Couldn't find path between ${word1} and ${word2}.`);
@@ -127,7 +127,7 @@ console.log (`missingLink: ${missingLink}`);
           console.log (`Trying ${el1}/${el2}`);
           pathMiddle= findPath (el1, el2, newBlacklist);
           if (pathMiddle)
-            resultsList.push ([word1].concat (possibleStarts[0], pathMiddle, possibleEnds[0], word2));
+            resultsList.push ([word1].concat (pathMiddle, word2));
         });
       });
       console.log (`All the possibles for ${possibleStarts}/${possibleEnds} ::::${resultsList}`);

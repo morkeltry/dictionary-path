@@ -1,19 +1,20 @@
 const dictionary = require ('./dictionary.tricky.json');
 const cache = {};
 const log = {
-  route : msg => process.stdout.write(`${msg}, `) ,
-  failureVerbose : console.log,
-  failure : msg => {
-    process.stdout.write(`${msg} `);
-    pathsNotFound++;
-  }
+  ///UNCOMMENT TO ENABLE PERFORMANCE LOGGING
+
+  // route : msg => process.stdout.write(`${msg}, `) ,
+  // failureVerbose : console.log,
+  // failure : msg => {
+  //   process.stdout.write(`${msg} `);
+  //   pathsNotFound++;
+  // }
 };
 var countPathsCalculated =0;
 var countCacheRetrievals =0;
 var pathsNotFound =0;
 
 const hammingDistance = (word1,word2) => {
-
   // return Hamming distance between two strings
 
   if (typeof word1 !== 'string' || typeof word2 !== 'string')
@@ -35,7 +36,7 @@ const hammingDistance = (word1,word2) => {
 }
 
 const hD1neighbours = (subArray, targetWord, blacklist=[]) => {
-  // return the subArray filtered down to only members with HammingDistance 1 from targetWord and exclude members of blacklist
+  // return the subArray filtered down to only members with HammingDistance 1 from targetWord (and exclude members of blacklist)
   return dictionary.filter (el =>
     !(blacklist.includes(el))
     && hammingDistance(el, targetWord) === 1);
@@ -60,14 +61,6 @@ const allSharedMembers = (arraySet) => {
   return result;
 }
 
-const addFailureToCache = (start, end) => {
-  cache[start] = cache[start] || {};
-  cache[start][end] = {failed: true};
-  cache[end] = cache[end] || {};
-  cache[end][start] = {failed: true};
-  log.failure ('#');
-}
-
 const addToCache = (route, distance) => {
 /// add a route to the cache only if not already there or distance < cached distance of either this route or its reverse
   countPathsCalculated++;
@@ -79,7 +72,6 @@ const addToCache = (route, distance) => {
   cache[start] = cache[start] || {};
   cache[start][end] = cache[start][end] || {route, distance};
   cache[end] = cache[end] || {};
-const routeReverse = route.slice().reverse();
   cache[end][start] = cache[end][start] || {route: route.slice().reverse(), distance};
 
   if (distance < cache[start][end].distance && distance < cache[end][start].distance) {
@@ -88,6 +80,14 @@ const routeReverse = route.slice().reverse();
     cache[end][start].route = route.reverse();
   }
 };
+
+const addFailureToCache = (start, end) => {
+  cache[start] = cache[start] || {};
+  cache[start][end] = {failed: true};
+  cache[end] = cache[end] || {};
+  cache[end][start] = {failed: true};
+  log.failure ('#');
+}
 
 const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 /// find a path! (don't forget to avoid words on the blacklist)

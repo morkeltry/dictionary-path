@@ -52,13 +52,10 @@ const allSharedMembers = (arraySet) => {
 const addToCache = (route, distance) => {
 /// add a route to the cache only if not already there or distance < cached distance of either this route or its reverse
 
-console.log (`request to add ${route} (specified length ${distance}) to cache`);
-
   const start = route[0];
   const end = route[route.length-1];
   if (distance===undefined)
     distance = route.length-1;
-console.log (`request to add ${route} (length ${distance}) to cache`);
   cache[start] = cache[start] || {};
   cache[start][end] = cache[start][end] || {route, distance};
   cache[end] = cache[end] || {};
@@ -73,8 +70,6 @@ console.log (`request to add ${route} (length ${distance}) to cache`);
 
 const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 /// find a path! (don't forget to avoid words on the blacklist)
-
-console.log (`find a path between ${word1} and ${word2}`)
 
   /// is it cached? We trust our cache :)
   if (cache[word1] && cache[word1][word2])
@@ -93,8 +88,6 @@ console.log (`find a path between ${word1} and ${word2}`)
   const possibleStarts = hD1neighbours (dictionary, word1, blacklist);
   const possibleEnds = hD1neighbours (dictionary, word2, blacklist);
   const missingLink = allSharedMembers ([possibleStarts, possibleEnds])[0];
-console.log (`possibles: ${possibleStarts}...${possibleEnds}`);
-console.log (`missingLink: ${missingLink}`);
   // if no shared members in the arrays possibleStarts & possibleEnds, missingLink will be undefined,
   // otherwise the missing word in the path (or arbitrary one of possible paths if multiple exist)
   if (missingLink) {
@@ -139,21 +132,17 @@ console.log (`missingLink: ${missingLink}`);
       const resultsList = [];
       var pathMiddle;
       const newBlacklist = blacklist.concat (word1, word2);
-  console.log (`Got multiple possibles. possibleStarts=${possibleStarts}, possibleEnds=${possibleEnds}`);
       possibleStarts.forEach (el1 => {
         possibleEnds.forEach (el2 => {
-          console.log (`Trying ${el1}/${el2}`);
           pathMiddle= findPath (el1, el2, newBlacklist);
           if (pathMiddle)
             resultsList.push ([word1].concat (pathMiddle, word2));
         });
       });
-      console.log (`All the possibles for ${possibleStarts}/${possibleEnds} ::::${resultsList}`);
       if (resultsList.length === 0)
         return undefined;
       else {
         resultsList.sort ((list1,list2) => list1.length-list2.length);
-        console.log(`Got a list - attempting to add each member of ${resultsList}`);
         resultsList.forEach (el => addToCache(el));
         return cache[word1][word2].route;
       }

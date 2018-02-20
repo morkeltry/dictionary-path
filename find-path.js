@@ -1,5 +1,16 @@
-dictionary = require ('./dictionary.tricky.json');
-cache = {};
+const dictionary = require ('./dictionary.tricky.json');
+const cache = {};
+const log = {
+  route : msg => process.stdout.write(`${msg}, `) ,
+  failureVerbose : console.log,
+  failure : msg => {
+    process.stdout.write(`${msg}, `);
+    pathsNotFound++;
+  }
+};
+var countPathsCalculated =0;
+var countCacheRetrievals =0;
+var pathsNotFound =0;
 
 const hammingDistance = (word1,word2) => {
 
@@ -51,6 +62,7 @@ const allSharedMembers = (arraySet) => {
 
 const addToCache = (route, distance) => {
 /// add a route to the cache only if not already there or distance < cached distance of either this route or its reverse
+  countPathsCalculated++;
 
   const start = route[0];
   const end = route[route.length-1];
@@ -73,10 +85,19 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 /// find a path! (don't forget to avoid words on the blacklist)
 
   /// is it cached? We trust our cache :)
-  if (cache[word1] && cache[word1][word2])
+  if (cache[word1] && cache[word1][word2]) {
+    log.route (`.${word1}-${word2}.`);
+    countCacheRetrievals ++;
     return cache[word1][word2].route;
-  if (cache[word2] && cache[word2][word1])
+  }
+  if (cache[word2] && cache[word2][word1]) {
+    log.route (`.${word1}-${word2}.`);
+    countCacheRetrievals ++;
     return cache[word2][word1].route.reverse();
+  }
+
+  log.route (`[${word1}-${word2}]`);
+
 
   /// maybe we have a /reaally/ easy job here?
   if (hammingDistance (word1,word2) === 1) {
@@ -101,12 +122,12 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
     // case 0: there are no possible paths between the given words.
     case 0: {
       if (!suppressOutput) {
-        console.log (`No possible path`);
         if (possibleStarts.length === 0 )
-          console.log (`${word1} has no neighbours`);
+          log.failureVerbose (`${word1} has no neighbours`);
         if (possibleEnds.length === 0 )
-          console.log (`${word2} has no neighbours`);
+          log.failureVerbose (`${word2} has no neighbours`);
       }
+      log.failure ('#');
       return undefined;
     }
 
@@ -119,8 +140,9 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
       }
       else {
         if (!suppressOutput) {
-          console.log (`Couldn't find path between ${word1} and ${word2}.`);
+          log.failureVerbose (`Couldn't find path between ${word1} and ${word2}.`);
         }
+        log.failure ('#');
         return undefined;
       }
     }
@@ -139,8 +161,10 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
           }
         });
       });
-      if (resultsList.length === 0)
+      if (resultsList.length === 0) {
+        log.failure ('#');
         return undefined;
+      }
       else {
         resultsList.sort ((list1,list2) => list1.length-list2.length);
         resultsList.forEach (el => addToCache(el));
@@ -152,9 +176,14 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 
 }
 
-console.log(`Answer to ('lick','lack'): ${findPath('lick','lack')}\n`);
-console.log(`Answer to ('lick','hack'): ${findPath('lick','hack')}\n`);
-console.log(`Answer to ('sick','hack'): ${findPath('sick','hack')}\n`);
-console.log(`Answer to ('sock','hack'): ${findPath('sock','hack')}\n`);
+console.log (`\nAnswer to ('lick','lack'): ${findPath('lick','lack')}\n`);
+console.log (`\nAnswer to ('lick','hack'): ${findPath('lick','hack')}\n`);
+console.log (`\nAnswer to ('sick','hack'): ${findPath('sick','hack')}\n`);
+console.log (`\nAnswer to ('sock','hack'): ${findPath('sock','hack')}\n`);
+
+console.log (`dictionary length: ${dictionary.length}`);
+console.log (`paths calculated: ${countPathsCalculated}`);
+console.log (`paths retrieved from cache: ${countCacheRetrievals}`);
+console.log (`paths found not to exist: ${pathsNotFound}`);
 
 // console.log (JSON.stringify (cache));

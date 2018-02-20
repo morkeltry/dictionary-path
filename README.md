@@ -9,7 +9,7 @@ Searches for paths recursively and naively (ie in the order that it comes across
  Includes caching, so that the shortest path between two words, once found, is cached and is not subsequently recalculated when the same pair's shortest path is needed.
 
  ### v3:
- Add logging- to give an idea of how efficiently the search performs.
+ Add logging- to give an idea of how efficiently the search performs. The first thing I noticed once this feature was complete is that (in the small dictionaries I used), far more computation is used on duplicating searches for paths which do not exist than was used in duplicating finding existent paths
 
 
 

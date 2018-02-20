@@ -9,7 +9,7 @@ A module to find the shortest path, changing one letter at a time, between a giv
  ```
 
 Place a dictionary, as a .json containing an array of unique, same-length strings into the folder.
-`require` in in, by chaging the filename in line 1 of `find-path.js`.
+`require` it in, by changing the filename in line 1 of `find-path.js`.
 
 Pass two words from the dictionary to the `findPath()` function, eg following the format at the end of  `find-path.js`:
 ```
@@ -43,7 +43,7 @@ I thought first about the edge cases which could confuse an 'intuitive' search t
 * dead ends.
 * words ceasing to be valid
 
-I avoided the problem of non-dictionary words by only ever selecting words which wer in the dictionary. I assumed a constant dictionary, which meant that the only way words would cease to be valid was if they created an inefficient path (eg looping).
+I avoided the problem of non-dictionary words by only ever selecting words which were in the dictionary. I assumed a constant dictionary, which meant that the only way words would cease to be valid was if they created an inefficient path (eg looping).
 
 I decided to start with a 'naive' search, which would evaluate all possible paths, and therefore eventually find the shorter paths where it existed. Loops and dead ends are simply a fact which needs to be dealt with.
 

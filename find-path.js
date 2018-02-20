@@ -4,7 +4,7 @@ const log = {
   route : msg => process.stdout.write(`${msg}, `) ,
   failureVerbose : console.log,
   failure : msg => {
-    process.stdout.write(`${msg}, `);
+    process.stdout.write(`${msg} `);
     pathsNotFound++;
   }
 };
@@ -60,6 +60,14 @@ const allSharedMembers = (arraySet) => {
   return result;
 }
 
+const addFailureToCache = (start, end) => {
+  cache[start] = cache[start] || {};
+  cache[start][end] = {failed: true};
+  cache[end] = cache[end] || {};
+  cache[end][start] = {failed: true};
+  log.failure ('#');
+}
+
 const addToCache = (route, distance) => {
 /// add a route to the cache only if not already there or distance < cached distance of either this route or its reverse
   countPathsCalculated++;
@@ -86,13 +94,21 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 
   /// is it cached? We trust our cache :)
   if (cache[word1] && cache[word1][word2]) {
-    log.route (`.${word1}-${word2}.`);
     countCacheRetrievals ++;
+    if (cache[word1][word2].failed) {
+      log.failure ('#');
+      return undefined
+    }
+    log.route (`.${word1}-${word2}.`);
     return cache[word1][word2].route;
   }
   if (cache[word2] && cache[word2][word1]) {
-    log.route (`.${word1}-${word2}.`);
     countCacheRetrievals ++;
+    if (cache[word2][word1].failed) {
+      log.failure ('#');
+      return undefined
+    }
+    log.route (`.${word1}-${word2}.`);
     return cache[word2][word1].route.reverse();
   }
 
@@ -127,7 +143,7 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
         if (possibleEnds.length === 0 )
           log.failureVerbose (`${word2} has no neighbours`);
       }
-      log.failure ('#');
+      addFailureToCache (word1,word2);
       return undefined;
     }
 
@@ -142,7 +158,7 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
         if (!suppressOutput) {
           log.failureVerbose (`Couldn't find path between ${word1} and ${word2}.`);
         }
-        log.failure ('#');
+        addFailureToCache (word1,word2);
         return undefined;
       }
     }
@@ -162,7 +178,7 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
         });
       });
       if (resultsList.length === 0) {
-        log.failure ('#');
+        addFailureToCache (word1,word2);
         return undefined;
       }
       else {
@@ -183,7 +199,7 @@ console.log (`\nAnswer to ('sock','hack'): ${findPath('sock','hack')}\n`);
 
 console.log (`dictionary length: ${dictionary.length}`);
 console.log (`paths calculated: ${countPathsCalculated}`);
-console.log (`paths retrieved from cache: ${countCacheRetrievals}`);
 console.log (`paths found not to exist: ${pathsNotFound}`);
+console.log (`paths/ failures retrieved from cache: ${countCacheRetrievals}`);
 
 // console.log (JSON.stringify (cache));

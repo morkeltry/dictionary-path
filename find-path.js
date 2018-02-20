@@ -1,15 +1,19 @@
 const dictionary = require ('./dictionary.tricky.json');
 const cache = {};
 const log = {
-  ///UNCOMMENT TO ENABLE PERFORMANCE LOGGING
+  route : msg => process.stdout.write(`${msg}, `) ,
+  failureVerbose : console.log,
+  failure : msg => {
+    process.stdout.write(`${msg} `);
+    pathsNotFound++;
+  },
 
-  // route : msg => process.stdout.write(`${msg}, `) ,
-  // failureVerbose : console.log,
-  // failure : msg => {
-  //   process.stdout.write(`${msg} `);
-  //   pathsNotFound++;
-  // }
+  /// OVERRIDE LOGGING - comment out below to ALLOW logging
+    route : msg => {},
+  failure : msg => pathsNotFound++,
+
 };
+
 var countPathsCalculated =0;
 var countCacheRetrievals =0;
 var pathsNotFound =0;

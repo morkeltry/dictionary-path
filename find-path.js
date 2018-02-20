@@ -1,4 +1,5 @@
-dictionary = require ('./dictionary.tricky.json')
+dictionary = require ('./dictionary.tricky.json');
+cache = {};
 
 const hammingDistance = (word1,word2) => {
 
@@ -48,30 +49,44 @@ const allSharedMembers = (arraySet) => {
   return result;
 }
 
-const purgeArraysMutably = (arraySet, purgeList, purgeFirstOccurrenceOnly=false) => {
-  // mutate each array in arraySet by purging each occurrence of each member of purgeList.
-  // non-ideal implementation - this would be faster with objects, but I'm using useful array methods elsewhere like .filter() and .length
-  var idx;
-  arraySet.forEach (elArr => {
-    purgeList.forEach (purgeable => {
-      while (idx= elArr.indexOf (purgable) >= 0) {
-        elArr.splice (idx,1);
-        if (purgeFirstOccurrenceOnly)
-          break;
-      }
-    });
-  });
-}
+const addToCache = (route, distance) => {
+/// add a route to the cache only if not already there or distance < cached distance of either this route or its reverse
 
+console.log (`request to add ${route} (specified length ${distance}) to cache`);
+
+  const start = route[0];
+  const end = route[route.length-1];
+  if (distance===undefined)
+    distance = route.length-1;
+console.log (`request to add ${route} (length ${distance}) to cache`);
+  cache[start] = cache[start] || {};
+  cache[start][end] = cache[start][end] || {route, distance};
+  cache[end] = cache[end] || {};
+  cache[end][start] = cache[end][start] || {route: route.reverse(), distance};
+
+  if (distance < cache[start][end].distance && distance < cache[end][start].distance) {
+    cache[start][end].distance = cache[end][start].distance = distance;
+    cache[start][end].route = route;
+    cache[end][start].route = route.reverse();
+  }
+};
 
 const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 /// find a path! (don't forget to avoid words on the blacklist)
 
 console.log (`find a path between ${word1} and ${word2}`)
 
+  /// is it cached? We trust our cache :)
+  if (cache[word1] && cache[word1][word2])
+    return cache[word1][word2].route;
+  if (cache[word2] && cache[word2][word1])
+    return cache[word2][word1].route.reverse();
+
   /// maybe we have a /reaally/ easy job here?
-  if (hammingDistance (word1,word2) === 1)
+  if (hammingDistance (word1,word2) === 1) {
+    addToCache ([word1,word2]);
     return [word1,word2];
+  }
 
 
   /// maybe it's just a /bit/ easy?
@@ -82,8 +97,10 @@ console.log (`possibles: ${possibleStarts}...${possibleEnds}`);
 console.log (`missingLink: ${missingLink}`);
   // if no shared members in the arrays possibleStarts & possibleEnds, missingLink will be undefined,
   // otherwise the missing word in the path (or arbitrary one of possible paths if multiple exist)
-  if (missingLink)
+  if (missingLink) {
+    addToCache ([word1,missingLink,word2]);
     return [word1,missingLink,word2];
+  }
 
 
   switch (possibleStarts.length * possibleEnds.length ) {
@@ -103,8 +120,10 @@ console.log (`missingLink: ${missingLink}`);
     // case 1: both the start and end of the list have exactly one neighbour candidate for possible paths
     case 1: {
       const pathMiddle= findPath (possibleStarts[0],possibleEnds[0], blacklist.concat (word1, word2))
-      if (pathMiddle)
+      if (pathMiddle) {
+        addToCache ([word1].concat (pathMiddle, word2));
         return [word1].concat (pathMiddle, word2);
+      }
       else {
         if (!suppressOutput) {
           console.log (`Couldn't find path between ${word1} and ${word2}.`);
@@ -134,14 +153,18 @@ console.log (`missingLink: ${missingLink}`);
         return undefined;
       else {
         resultsList.sort ((list1,list2) => list1.length-list2.length);
-        console.log(`Got a list - returning ${resultsList[0]} as first member of ${resultsList}`);
-        return resultsList[0];
+        console.log(`Got a list - attempting to add each member of ${resultsList}`);
+        resultsList.forEach (el => addToCache(el));
+        return cache[word1][word2].route;
       }
 
     }
   };
 
 }
+
+
+
 
 console.log(`Answer to ('lick','lack'): ${findPath('lick','lack')}\n`);
 console.log(`Answer to ('lick','hack'): ${findPath('lick','hack')}\n`);

@@ -59,10 +59,11 @@ const addToCache = (route, distance) => {
   cache[start] = cache[start] || {};
   cache[start][end] = cache[start][end] || {route, distance};
   cache[end] = cache[end] || {};
-  cache[end][start] = cache[end][start] || {route: route.reverse(), distance};
+const routeReverse = route.slice().reverse();
+  cache[end][start] = cache[end][start] || {route: route.slice().reverse(), distance};
 
   if (distance < cache[start][end].distance && distance < cache[end][start].distance) {
-    cache[start][end].distance = cache[end][start].distance = distance;
+    cache[start][end].distance =  cache[end][start].distance = distance;
     cache[start][end].route = route;
     cache[end][start].route = route.reverse();
   }
@@ -82,7 +83,6 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
     addToCache ([word1,word2]);
     return [word1,word2];
   }
-
 
   /// maybe it's just a /bit/ easy?
   const possibleStarts = hD1neighbours (dictionary, word1, blacklist);
@@ -125,7 +125,6 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
       }
     }
 
-
     // default case: one or both of start and end have multiple possible paths
     // naive algorithm: try all and compare lengths.
     default: {
@@ -135,8 +134,9 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
       possibleStarts.forEach (el1 => {
         possibleEnds.forEach (el2 => {
           pathMiddle= findPath (el1, el2, newBlacklist);
-          if (pathMiddle)
+          if (pathMiddle) {
             resultsList.push ([word1].concat (pathMiddle, word2));
+          }
         });
       });
       if (resultsList.length === 0)
@@ -152,12 +152,9 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
 
 }
 
-
-
-
 console.log(`Answer to ('lick','lack'): ${findPath('lick','lack')}\n`);
 console.log(`Answer to ('lick','hack'): ${findPath('lick','hack')}\n`);
 console.log(`Answer to ('sick','hack'): ${findPath('sick','hack')}\n`);
 console.log(`Answer to ('sock','hack'): ${findPath('sock','hack')}\n`);
-// console.log(`Let's go with ('',''): ${findPath('','')}`);
-// console.log(`Let's go with ('',''): ${findPath('','')}`);
+
+// console.log (JSON.stringify (cache));

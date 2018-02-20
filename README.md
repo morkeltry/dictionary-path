@@ -56,6 +56,7 @@ I realised that recursion would be the simplest way to deal with word lengths lo
 Recursive search feels like it operates in a maximum kn^2 time (n being dictionary size), which would be slow for large dictionaries. I therefore aimed to leave room for improvement.
 
 The improvement I made eventually made was to add a cache so that repeated recursive search on the same word pairs were unnecessary. As there are a small number of letters, any word can have only so many potential neighbours, so that the maximal search time is reduced to 2kn. In my small dictionary, caching made little difference, saving only about 25% of path trials.
+You can compare efficiency with a larger disctionary by cloning the `no-cache` branch.
 
 The entire dictionary still needs to be looped over to find neighbours, so an index of neighbours would also save time.
 

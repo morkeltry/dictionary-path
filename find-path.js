@@ -70,6 +70,8 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
   /// maybe we have a /reaally/ easy job here?
   if (hammingDistance (word1,word2) === 1)
     return [word1,word2];
+  if (hammingDistance (word1,word2) === 0)
+    return [word1];
 
 
   /// maybe it's just a /bit/ easy?
@@ -134,7 +136,8 @@ const findPath = (word1,word2, blacklist=[], suppressOutput=true) => {
   };
 
 }
-
+console.log(`hammingDistance('',''): ${hammingDistance('','')}`);
+console.log(`Answer to (lick','lick'): ${findPath('lick','lick')}\n`);
 console.log(`Answer to ('lick','lack'): ${findPath('lick','lack')}\n`);
 console.log(`Answer to ('lick','hack'): ${findPath('lick','hack')}\n`);
 console.log(`Answer to ('sick','hack'): ${findPath('sick','hack')}\n`);
